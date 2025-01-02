@@ -1,28 +1,3 @@
-// app/api/bookings/route.js
-export async function POST(req) {
-  const data = await req.json();
-  
-  const response = await fetch('http://localhost:5000/api/bookings', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
-
-  if (!response.ok) {
-    return Response.json({ error: 'Booking failed' }, { status: 400 });
-  }
-
-  return Response.json(await response.json(), { status: 201 });
-}
-
-export async function GET() {
-  const response = await fetch('http://localhost:5000/api/bookings');
-  return Response.json(await response.json());
-}
-
-// app/api/bookings/[id]/route.js
 // app/api/bookings/[id]/route.js
 export async function DELETE(req, { params }) {
   const { id } = params;
@@ -38,6 +13,40 @@ export async function DELETE(req, { params }) {
 
     return new Response(null, { status: 204 });
   } catch (error) {
-    return Response.json({ error: 'Server error' }, { status: 500 });
+    console.error('Delete booking error:', error);
+    return Response.json({ error: error.message }, { status: 500 });
+  }
+}
+
+// app/api/bookings/route.js
+export async function POST(req) {
+  try {
+    const data = await req.json();
+    const response = await fetch('http://localhost:5000/api/bookings', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error('Booking failed');
+    }
+
+    return Response.json(await response.json(), { status: 201 });
+  } catch (error) {
+    console.error('Post booking error:', error);
+    return Response.json({ error: error.message }, { status: 400 });
+  }
+}
+
+export async function GET() {
+  try {
+    const response = await fetch('http://localhost:5000/api/bookings');
+    return Response.json(await response.json());
+  } catch (error) {
+    console.error('Get bookings error:', error);
+    return Response.json({ error: error.message }, { status: 500 });
   }
 }
